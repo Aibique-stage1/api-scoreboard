@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO Example</title>
+  </head>
+  <body>
+    <div id="data"></div>
+    <script
+      src="https://cdn.socket.io/4.1.2/socket.io.min.js"
+      integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const socket = io("http://localhost:3000/");
+
+      socket.on("inicio", function (data) {
+        document.getElementById("Homero").innerText = data.Homero.score;
+        document.getElementById("Bart").innerText = data.Bart.score;
+      });
+
+      function update(jugador, tipo) {
+        let player = document.getElementById(jugador);
+        let score = parseInt(player.innerText);
+        tipo === "add" ? score++ : score--;
+        const data = {
+          username: jugador,
+          score: score,
+        };
+        fetch("http://localhost:3000/players", {
+          method: "PUT", // or 'PUT'
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data.data.score);
+            player.innerText = data.data.score;
+          });
+        socket.emit("actualizarP", "actualizar");
+      }
+    </script>
+    <section id="tabla-puntuacion">
+      <h1>Jugadores</h1>
+      <div id="contenedor">
+        <div>
+          <h2>Homer</h2>
+          <div>
+            <button onclick="update('Homero', 'add')">+</button>
+            <button onclick="update('Homero', 'reduce')">-</button>
+          </div>
+          <h3 id="Homero">0</h3>
+        </div>
+        <div>
+          <h2>Bart</h2>
+          <div>
+            <button onclick="update('Bart', 'add')">+</button>
+            <button onclick="update('Bart', 'reduce')">-</button>
+          </div>
+          <h3 id="Bart">0</h3>
+        </div>
+      </div>
+    </section>
+  </body>
+  <style>
+    h1 {
+      text-align: center;
+    }
+    #tabla-puntuacion {
+      border-radius: 10px;
+      background: #fafafa;
+      padding: 2rem;
+      box-shadow: rgba(0, 0, 0, 0.3) 5px 5px 5px;
+      margin: 0 auto;
+      margin-top: 5rem;
+      width: 50%;
+    }
+    #contenedor {
+      display: flex;
+      justify-content: space-around;
+    }
+  </style>
+</html>
